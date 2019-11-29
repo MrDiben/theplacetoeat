@@ -1,0 +1,80 @@
+version: "3"
+
+services:
+  backend:
+    build:
+      context: ./backend
+    command: /start_prod.sh
+    volumes:
+      - django-static:/code/static
+    depends_on:
+      - db
+    env_file:
+      - .env
+
+  db:
+    image: library/postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - PUID=998
+      - PGID=998
+      - TZ=Europe/London
+      - URL=mrdiben.com
+      - SUBDOMAINS=www,
+      - VALIDATION=http
+      - STAGING=false
+    volumes:
+      - ./nginx/data/nginx/prod.conf:/config/nginx/site-confs/default
+      - ./nginx/data/nginx/nginx.conf:/config/nginx/nginx.conf
+      - django-static:/usr/src/app/static
+    ports:
+      - 443:443
+      - 80:80
+    depends_on:
+      - backend
+    env_file:
+      - .env
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    env_file:
+      - .env
+
+  celery:
+    build: ./backend
+    command: bash -c 'celery worker --app=backend.celery_app:app --loglevel=info'
+    ports:
+      - "7787:9000"
+      - "7788:9001"
+    depends_on:
+      - celery-beat
+    env_file:
+      - .env
+
+  celery-beat:
+    build: ./backend
+    command: bash -c 'celery -A backend beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler'
+    ports:
+      - "7797:9000"
+      - "7798:9001"
+    depends_on:
+      - backend
+      - redis
+    env_file:
+      - .env
+
+volumes:
+  django-static:
+  pgdata:

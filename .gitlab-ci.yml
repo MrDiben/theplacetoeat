@@ -1,0 +1,50 @@
+stages:
+  - test
+  - deploy_staging
+
+image: frolvlad/alpine-python3
+
+test:
+  stage: test
+
+  only:
+    - staging
+  tags:
+    - staging
+
+  script:
+    - python3 -V
+    - pip install virtualenv
+    - virtualenv -p python3 env
+    - source env/bin/activate
+    - cd backend && pip install -r requirements-dev.txt
+    - python manage.py test --settings backend.ci
+    - echo test print
+
+deploy_staging:
+  stage: deploy_staging
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - export DYNAMIC_ENV_VAR=STAGING
+  only:
+    - staging
+  tags:
+    - staging
+  script:
+    - echo setting up env $DYNAMIC_ENV_VAR
+    - echo POSTGRES_DB=$POSTGRES_DB >> .env
+    - echo POSTGRES_PASSWORD=$POSTGRES_PASSWORD >> .env
+    - echo POSTGRES_USER=$POSTGRES_USER >> .env
+    - echo DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY >> .env
+    - echo HOST=$HOST >> .env
+    - echo DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS >> .env
+    - echo DATABASE_URL=$DATABASE_URL >> .env
+    - echo GOOGLE_API_KEY=$GOOGLE_API_KEY >> .env
+    - ls -a
+    - echo VUE_APP_BACK_BASE_URL=$VUE_APP_BACK_BASE_URL >> ./frontend/.env
+    - docker image prune -f
+    - docker-compose stop
+    - docker-compose build --no-cache
+    - docker-compose up -d

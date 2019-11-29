@@ -1,0 +1,90 @@
+version: "3"
+
+services:
+  db:
+    image: library/postgres
+    env_file:
+      - .env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile-dev
+    command: /start_dev.sh
+    volumes:
+      - ./backend:/code
+      - django-static:/code/backend/static
+    env_file:
+      - .env
+    depends_on:
+      - db
+    ports:
+      - "7777:9000"
+      - "7778:9001"
+
+  frontend:
+    build:
+      context: ./frontend
+    volumes:
+      - "./frontend:/app/"
+      - "/app/node_modules"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend
+    environment:
+      - NODE_ENV=development
+      - npm_config_unsafe_perm=true
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      - frontend
+    volumes:
+      - ./nginx/data/nginx/dev.conf:/etc/nginx/nginx.conf:ro
+      - django-static:/usr/src/app/static
+    env_file:
+      - .env
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    env_file:
+      - .env
+
+  celery:
+    build: ./backend
+    command: bash -c 'celery worker -A backend -l debug --concurrency=3'
+    ports:
+      - "7787:9000"
+      - "7788:9001"
+    volumes:
+      - ./backend:/code
+    depends_on:
+      - celery-beat
+    env_file:
+      - .env
+
+  celery-beat:
+    build: ./backend
+    command: bash -c 'celery -A backend beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler'
+    ports:
+      - "7797:9000"
+      - "7798:9001"
+    volumes:
+      - ./backend:/code
+    depends_on:
+      - backend
+      - redis
+    env_file:
+      - .env
+
+volumes:
+  django-static:
+  pgdata:

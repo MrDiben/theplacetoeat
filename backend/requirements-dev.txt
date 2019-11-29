@@ -1,0 +1,15 @@
+-r requirements.txt
+
+# dev
+black
+coverage
+django-debug-toolbar
+isort
+flake8
+factory-boy
+pylint
+pylint-django
+pytest
+pytest-django
+requests-mock
+ptvsd
