@@ -1,5 +1,14 @@
 # PWA Project: ThePlaceToEat
 
+<img src="images/homepage.png" alt="Home page"
+style="float: top; margin-right: 10px" width="200"/>
+<img src="images/restaurant-detail.png" alt="Restaurant detail"
+style="float: left; margin-right: 10px" width="200"/>
+<img src="images/meal-inv.png" alt="Meal invitation"
+style="float: left; margin-right: 10px" width="200"/>
+<img src="images/current-meals.png" alt="Current meals"
+style="float: left; margin-right: 10px" width="200"/>
+
 ##  Description:
 
 ThePlaceToEat is an app to recommand restaurants to users every day. Datas are
