@@ -204,7 +204,7 @@ export default {
       if (this.book === 0) {
         return this.$t("createMeal");
       }
-      return "Back";
+      return this.$t("back");
     }
   },
   methods: {
@@ -271,7 +271,8 @@ export default {
     "webSite": "Web site",
     "create": "Create",
     "createMeal": "Create meal",
-    "selectFriendsWarn": "You must select some guests if you don't eat alone"
+    "selectFriendsWarn": "You must select some guests if you don't eat alone",
+    "back": "Back"
   },
   "fr": {
     "restaurantSheet": "Fiche restaurant",
@@ -284,7 +285,8 @@ export default {
     "webSite": "Site web",
     "create": "Créer",
     "createMeal": "Créer repas",
-    "selectFriendsWarn": "Sélectionnez des amis si vous ne mangez pas tout seul !"
+    "selectFriendsWarn": "Sélectionnez des amis si vous ne mangez pas tout seul !",
+    "back": "Retour"
   }
 }
 </i18n>
