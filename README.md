@@ -9,7 +9,6 @@ style="float: left; margin-right: 10px" width="200"/>
 <img src="images/current-meals.png" alt="Current meals"
 style="float: left; margin-right: 10px" width="200"/>
 
-##  Description:
 
 ThePlaceToEat is an app to recommand restaurants to users every day. Datas are
 provided by Google Places API.
